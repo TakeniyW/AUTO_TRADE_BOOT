@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>刘一策略 · 合约交易终端</title>
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">刘</div>
+      <div class="brand-text">
+        <strong>LIUYI QUANT</strong>
+        <span>合约策略终端</span>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <button class="nav-item active" data-view="trade">
+        <svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 3 6-8 3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>交易台</span>
+      </button>
+      <button class="nav-item" data-view="backtest">
+        <svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 4-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>策略回测</span>
+      </button>
+      <button class="nav-item" data-view="strategy">
+        <svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8M9 4v6M15 14v6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <span>策略参数</span>
+      </button>
+      <button class="nav-item" data-view="data">
+        <svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+        <span>数据中心</span>
+      </button>
+      <button class="nav-item" data-view="settings">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <span>设置</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="mini-status">
+        <span class="dot" id="sideDot"></span>
+        <div>
+          <strong id="sideStatus">引擎待机</strong>
+          <span id="sideMode">paper</span>
+        </div>
+      </div>
+      <p class="version">v1.0.0 · 仅供研究</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="page-head">
+        <span class="eyebrow" id="pageEyebrow">TRADING DESK</span>
+        <h1 id="pageTitle">交易台</h1>
+        <p id="pageSub">刘一策略 · ETH/USDT 永续 · 15m</p>
+      </div>
+      <div class="top-actions">
+        <div class="pill-conn" id="connPill">
+          <span class="dot" id="connDot"></span>
+          <span id="connText">连接中…</span>
+        </div>
+        <div class="top-equity">
+          <span>策略权益</span>
+          <strong id="topEquity">10,000.00</strong>
+          <em id="topEquitySub">USDT</em>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ================= 交易台 ================= -->
+      <section class="view active" id="view-trade">
+        <div class="trade-layout">
+          <div class="stack">
+            <div class="card hero-card">
+              <div class="hero-top">
+                <div class="run-state">
+                  <span class="status-pill" id="tradeStatusPill"><i class="dot"></i><b id="tradeStatusText">待机</b></span>
+                  <div class="run-meta" id="tradeMeta">尚未启动实时引擎</div>
+                </div>
+                <div class="hero-actions">
+                  <button class="btn btn-ghost" id="btnPanic">一键全平</button>
+                  <button class="btn btn-danger" id="btnStopLive" disabled>停止</button>
+                  <button class="btn btn-primary" id="btnStartLive">启动策略</button>
+                </div>
+              </div>
+              <div class="stat-row">
+                <div class="stat">
+                  <span>账户权益</span>
+                  <strong id="statEquity">—</strong>
+                  <em id="statEquitySub">USDT</em>
+                </div>
+                <div class="stat">
+                  <span>浮动盈亏</span>
+                  <strong id="statUpnl">—</strong>
+                  <em id="statUpnlSub">按标记价</em>
+                </div>
+                <div class="stat">
+                  <span>当前仓位</span>
+                  <strong id="statPosition">空仓</strong>
+                  <em id="statPositionSub">等待交叉信号</em>
+                </div>
+                <div class="stat">
+                  <span>跳过剩余</span>
+                  <strong id="statSkip">0</strong>
+                  <em>达标后空仓期</em>
+                </div>
+              </div>
+            </div>
+
+            <div class="card chart-card">
+              <div class="card-head">
+                <div>
+                  <h3>实时权益</h3>
+                  <p>每 60 秒采样 · 纸面模式含模拟资金费</p>
+                </div>
+                <div class="legend"><i class="swatch gold"></i>权益曲线</div>
+              </div>
+              <div class="chart tall" id="equityChart"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <h3>运行日志</h3>
+                  <p>信号、成交与风控事件</p>
+                </div>
+                <button class="btn btn-mini" id="btnRefreshLogs">刷新</button>
+              </div>
+              <div class="log-stream" id="logList">
+                <div class="empty-hint">启动引擎后，这里会显示实时信号与成交。</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stack">
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <h3>启动配置</h3>
+                  <p>选择运行环境与交易对</p>
+                </div>
+                <span class="tag" id="strategyTag">刘一策略</span>
+              </div>
+
+              <div class="segmented" id="modeSeg">
+                <button class="seg active" data-mode="paper">纸面模拟</button>
+                <button class="seg" data-mode="testnet">币安测试网</button>
+                <button class="seg" data-mode="live">实盘</button>
+              </div>
+              <p class="hint" id="modeHint">纸面模式不连接私有接口，使用实时行情模拟撮合，适合验证策略。</p>
+
+              <div class="field-grid">
+                <label class="field">
+                  <span>交易所</span>
+                  <select id="cfgExchange">
+                    <option value="binance">币安 Binance</option>
+                    <option value="okx">欧易 OKX</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>永续合约</span>
+                  <select id="cfgSymbol"></select>
+                </label>
+                <label class="field">
+                  <span>K 线周期</span>
+                  <select id="cfgTf">
+                    <option value="15m">15m</option>
+                    <option value="1h">1h</option>
+                    <option value="4h">4h</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>基础仓位 (USDT)</span>
+                  <input id="cfgBase" type="number" value="10000" step="500">
+                </label>
+                <label class="field">
+                  <span>目标净收益</span>
+                  <input id="cfgTarget" type="number" value="7" step="0.5" min="0.1"><i class="suffix">% / 笔</i>
+                </label>
+                <label class="field">
+                  <span>初始资金 (USDT)</span>
+                  <input id="cfgCapital" type="number" value="10000" step="1000">
+                </label>
+              </div>
+
+              <div class="key-state" id="keyState">未配置 API Key</div>
+
+              <div class="live-confirm" id="liveConfirmBox" hidden>
+                <label class="checkline">
+                  <input type="checkbox" id="liveRiskCheck">
+                  <span>我已知晓实盘风险，亏损自行承担</span>
+                </label>
+                <label class="field">
+                  <span>输入 START LIVE 以确认</span>
+                  <input id="liveConfirmInput" placeholder="START LIVE" autocomplete="off">
+                </label>
+              </div>
+
+              <button class="btn btn-primary btn-block" id="btnStartLive2">启动实时引擎</button>
+              <p class="fineprint">实盘启动需在设置中完成风险确认。启动前请核对交易所、币种与仓位。</p>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <h3>当前持仓</h3>
+                  <p id="posMeta">空仓 · 等待下一次交叉</p>
+                </div>
+                <span class="tag" id="posSideTag">FLAT</span>
+              </div>
+              <div class="position-body" id="posBody">
+                <div class="empty-hint">暂无持仓</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <h3>最近成交</h3>
+                  <p id="liveTradeMeta">本次会话</p>
+                </div>
+                <button class="btn btn-mini" id="btnRefreshTrades">刷新</button>
+              </div>
+              <div class="table-wrap short">
+                <table class="data-table">
+                  <thead><tr><th>方向</th><th>开仓</th><th>平仓</th><th>净盈亏</th><th>结果</th></tr></thead>
+                  <tbody id="liveTradesBody"><tr><td colspan="5" class="empty-cell">暂无成交</td></tr></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 回测 ================= -->
+      <section class="view" id="view-backtest">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h3>历史回测</h3>
+              <p>取币安 / 欧易永续历史 K 线，按刘一策略逐根撮合，含手续费与资金费</p>
+            </div>
+            <span class="tag" id="btDataTag">ETH/USDT · 15m</span>
+          </div>
+          <div class="bt-controls">
+            <label class="field">
+              <span>数据源</span>
+              <select id="btSource">
+                <option value="binance">币安 Binance</option>
+                <option value="okx">欧易 OKX</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>币种</span>
+              <select id="btSymbol"></select>
+            </label>
+            <label class="field">
+              <span>周期</span>
+              <select id="btTf">
+                <option value="15m">15m</option>
+                <option value="1h">1h</option>
+                <option value="4h">4h</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>开始日期</span>
+              <input id="btStart" type="date">
+            </label>
+            <label class="field">
+              <span>结束日期</span>
+              <input id="btEnd" type="date">
+            </label>
+            <label class="field">
+              <span>初始资金</span>
+              <input id="btCapital" type="number" step="1000" value="10000">
+            </label>
+            <button class="btn btn-primary" id="btRun">
+              <svg viewBox="0 0 24 24" class="btn-ic"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+              运行回测
+            </button>
+          </div>
+          <div class="progress-wrap" id="btProgressWrap" hidden>
+            <div class="progress"><i id="btProgressBar"></i></div>
+            <span id="btProgressText">准备中…</span>
+          </div>
+          <p class="fineprint">首次运行会自动下载缺失的历史归档（币安公共数据，无需 API Key）。欧易数据需网络可访问 okx.com。</p>
+        </div>
+
+        <div id="btEmpty" class="empty-state card">
+          <div class="empty-icon">∿</div>
+          <h3>还没有回测结果</h3>
+          <p>选择区间后点击「运行回测」。默认加载 2024-01-01 至今的 ETH/USDT 永续 15m 数据。</p>
+        </div>
+
+        <div id="btResult" hidden>
+          <div class="metric-grid" id="btMetrics"></div>
+
+          <div class="card chart-card">
+            <div class="card-head">
+              <div>
+                <h3>权益曲线与回撤</h3>
+                <p id="btChartMeta"></p>
+              </div>
+              <div class="legend"><i class="swatch gold"></i>权益 <i class="swatch red"></i>回撤</div>
+            </div>
+            <div class="chart tall" id="btEquityChart"></div>
+          </div>
+
+          <div class="card chart-card">
+            <div class="card-head">
+              <div>
+                <h3>价格与交易信号</h3>
+                <p>EMA25 / EMA99 交叉 · 买卖点标记</p>
+              </div>
+              <div class="legend"><i class="swatch blue"></i>EMA25 <i class="swatch purple"></i>EMA99</div>
+            </div>
+            <div class="chart tall" id="btPriceChart"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3>成交明细</h3>
+                <p id="btTradeMeta">—</p>
+              </div>
+              <div class="segmented small" id="btFilter">
+                <button class="seg active" data-filter="all">全部</button>
+                <button class="seg" data-filter="win">达标</button>
+                <button class="seg" data-filter="loss">未达标</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr><th>#</th><th>方向</th><th>开仓时间</th><th>平仓时间</th><th>开仓价</th><th>平仓价</th><th>名义仓位</th><th>杠杆</th><th>净盈亏</th><th>收益率</th><th>结果</th><th>出场原因</th></tr>
+                </thead>
+                <tbody id="btTradesBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 策略参数 ================= -->
+      <section class="view" id="view-strategy">
+        <div class="strategy-layout">
+          <div class="stack">
+            <div class="card">
+              <div class="card-head">
+                <div>
+                  <h3>刘一策略 · 参数</h3>
+                  <p>修改后保存即生效；回测与实时引擎共用同一套参数</p>
+                </div>
+                <span class="tag">可自定义</span>
+              </div>
+
+              <div class="form-section">
+                <h4>基础设置</h4>
+                <div class="field-grid three">
+                  <label class="field"><span>策略名称</span><input id="spName" type="text"></label>
+                  <label class="field"><span>交易对</span><select id="spSymbol"></select></label>
+                  <label class="field"><span>周期</span><select id="spTf"><option>15m</option><option>1h</option><option>4h</option><option>1d</option></select></label>
+                  <label class="field"><span>初始资金 (USDT)</span><input id="spCapital" type="number" step="1000"></label>
+                  <label class="field"><span>基础仓位 (USDT)</span><input id="spBase" type="number" step="500"></label>
+                  <label class="field"><span>峰值每 +1000 加仓</span><input id="spGrowth" type="number" step="100"></label>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <h4>信号</h4>
+                <div class="field-grid three">
+                  <label class="field"><span>快线 EMA</span><input id="spFast" type="number" min="2"></label>
+                  <label class="field"><span>慢线 EMA</span><input id="spSlow" type="number" min="3"></label>
+                  <label class="field"><span>目标净收益 (%)</span><input id="spTarget" type="number" step="0.5" min="0.1"></label>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <h4>加仓与节奏</h4>
+                <div class="field-grid three">
+                  <label class="field"><span>连续未达标笔数</span><input id="spAddAfter" type="number" min="1"></label>
+                  <label class="field"><span>每次加仓比例 (%)</span><input id="spAddPct" type="number" step="10" min="0"></label>
+                  <label class="field"><span>仓位倍数上限</span><input id="spMaxMult" type="number" step="0.5" min="1"></label>
+                  <label class="field"><span>达标后跳过交叉</span><input id="spSkip" type="number" min="0"></label>
+                  <label class="field"><span>杠杆上限</span><input id="spMaxLev" type="number" step="1" min="1"></label>
+                  <label class="field"><span>杠杆模式</span>
+                    <select id="spLevMode">
+                      <option value="auto">自动（仓位 / 权益）</option>
+                      <option value="fixed">固定倍数</option>
+                    </select>
+                  </label>
+                  <label class="field" id="fixedLevWrap"><span>固定杠杆倍数</span><input id="spFixedLev" type="number" step="0.5" min="1"></label>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <h4>成本</h4>
+                <div class="field-grid three">
+                  <label class="field"><span>Taker 费率 (%) / 边</span><input id="spTaker" type="number" step="0.01" min="0"></label>
+                  <label class="field"><span>资金费率 (%) / 8h</span><input id="spFunding" type="number" step="0.01" min="0"></label>
+                  <label class="field"><span>预设</span>
+                    <select id="spPresetSelect"></select>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button class="btn btn-primary" id="spSave">保存参数</button>
+                <button class="btn btn-ghost" id="spApplyPreset">加载预设</button>
+                <button class="btn btn-ghost" id="spReset">恢复刘一策略默认</button>
+                <button class="btn btn-ghost" id="spSavePreset">另存为预设</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="stack">
+            <div class="card">
+              <div class="card-head"><div><h3>规则速览</h3><p>默认参数下的执行逻辑</p></div></div>
+              <ul class="rule-list">
+                <li><b>信号</b>15m 收盘确认 EMA25/99 交叉，下一根开盘市价成交。</li>
+                <li><b>止盈</b>按成本反解目标价，净收益达到仓位的 7% 即平仓。</li>
+                <li><b>止损</b>无独立止损，仅由反向交叉平仓并反手。</li>
+                <li><b>加仓</b>连续 4 笔未达标，仓位增加基础仓位的 50%。</li>
+                <li><b>达标</b>恢复基础仓位，空仓跳过 20 次交叉。</li>
+                <li><b>增长</b>峰值权益每 +1000，基础仓位 +500。</li>
+                <li><b>风控</b>杠杆按 仓位/权益 推算，钳制在 30x 内；爆仓即停止。</li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><div><h3>仓位阶梯预览</h3><p>连续未达标时的名义仓位</p></div></div>
+              <div class="table-wrap short">
+                <table class="data-table">
+                  <thead><tr><th>未达标笔数</th><th>倍数</th><th>名义仓位</th><th>所需涨幅</th></tr></thead>
+                  <tbody id="spPreviewBody"></tbody>
+                </table>
+              </div>
+              <div class="preview-note" id="spPreviewNote"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><div><h3>当前参数摘要</h3><p>实时计算</p></div></div>
+              <div class="kv-list" id="spSummary"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 数据中心 ================= -->
+      <section class="view" id="view-data">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h3>历史数据同步</h3>
+              <p>币安使用公共归档（无需 Key），欧易通过公共 REST 分页拉取</p>
+            </div>
+            <span class="tag" id="dataCacheTag">—</span>
+          </div>
+          <div class="bt-controls">
+            <label class="field"><span>数据源</span>
+              <select id="dsSource"><option value="binance">币安 Binance</option><option value="okx">欧易 OKX</option></select>
+            </label>
+            <label class="field"><span>币种</span><select id="dsSymbol"></select></label>
+            <label class="field"><span>周期</span><select id="dsTf"><option>15m</option><option>1h</option><option>4h</option><option>1d</option></select></label>
+            <label class="field"><span>开始日期</span><input id="dsStart" type="date"></label>
+            <label class="field"><span>结束日期</span><input id="dsEnd" type="date"></label>
+            <button class="btn btn-primary" id="dsSync">同步数据</button>
+          </div>
+          <div class="progress-wrap" id="dsProgressWrap" hidden>
+            <div class="progress"><i id="dsProgressBar"></i></div>
+            <span id="dsProgressText"></span>
+          </div>
+          <p class="fineprint" id="dsNote">币安归档通常延迟 1 天；当前仅内置 ETH 回测演示数据，可同步 BTC 等其它币种。</p>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div><h3>本地数据缓存</h3><p>SQLite 存储，回测优先读取本地</p></div>
+            <button class="btn btn-mini" id="dsRefresh">刷新</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>数据源</th><th>币种</th><th>周期</th><th>K 线数量</th><th>起始</th><th>截止</th><th>操作</th></tr></thead>
+              <tbody id="inventoryBody"><tr><td colspan="7" class="empty-cell">暂无缓存</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 设置 ================= -->
+      <section class="view" id="view-settings">
+        <div class="settings-layout">
+          <div class="stack">
+            <div class="card">
+              <div class="card-head">
+                <div><h3>交易所 API</h3><p>仅保存在本机 data/secrets.json（权限 600），不会外传</p></div>
+                <span class="tag warn">谨慎授权</span>
+              </div>
+
+              <div class="key-card">
+                <div class="key-head">
+                  <div class="ex-name"><i class="ex-logo binance">B</i><div><strong>币安 Binance</strong><span>USDT 本位永续 · 支持测试网</span></div></div>
+                  <span class="key-badge" id="keyBadgeBinance">未配置</span>
+                </div>
+                <div class="field-grid">
+                  <label class="field"><span>API Key</span><input id="binanceKey" autocomplete="off" placeholder="主网 API Key"></label>
+                  <label class="field"><span>API Secret</span><input id="binanceSecret" type="password" autocomplete="off" placeholder="主网 Secret"></label>
+                  <label class="field"><span>测试网 API Key</span><input id="binanceTestKey" autocomplete="off" placeholder="Futures Testnet Key"></label>
+                  <label class="field"><span>测试网 Secret</span><input id="binanceTestSecret" type="password" autocomplete="off" placeholder="Futures Testnet Secret"></label>
+                </div>
+                <div class="form-actions">
+                  <button class="btn btn-primary btn-mini" data-save-key="binance">保存主网</button>
+                  <button class="btn btn-primary btn-mini" data-save-key="binance_testnet">保存测试网</button>
+                  <button class="btn btn-ghost btn-mini" data-test-key="binance" data-mode="live">测试主网</button>
+                  <button class="btn btn-ghost btn-mini" data-test-key="binance_testnet" data-mode="testnet">测试测试网</button>
+                </div>
+                <p class="fineprint">建议使用只读 + 合约交易权限的独立 API Key，切勿开启提现权限。测试网 Key 请在币安 Futures Testnet 单独申请。</p>
+              </div>
+
+              <div class="key-card">
+                <div class="key-head">
+                  <div class="ex-name"><i class="ex-logo okx">O</i><div><strong>欧易 OKX</strong><span>USDT 本位永续 · 实盘</span></div></div>
+                  <span class="key-badge" id="keyBadgeOkx">未配置</span>
+                </div>
+                <div class="field-grid">
+                  <label class="field"><span>API Key</span><input id="okxKey" autocomplete="off" placeholder="粘贴 API Key"></label>
+                  <label class="field"><span>API Secret</span><input id="okxSecret" type="password" autocomplete="off" placeholder="粘贴 Secret"></label>
+                  <label class="field"><span>Passphrase</span><input id="okxPass" type="password" autocomplete="off" placeholder="API 密码短语"></label>
+                </div>
+                <div class="form-actions">
+                  <button class="btn btn-primary btn-mini" data-save-key="okx">保存</button>
+                  <button class="btn btn-ghost btn-mini" data-test-key="okx" data-mode="live">测试连接</button>
+                </div>
+                <p class="fineprint">欧易需要 Passphrase；请确保 API 已开通「交易」权限，并设置 IP 白名单。</p>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><div><h3>网络与偏好</h3><p>代理留空则自动读取环境变量 HTTPS_PROXY</p></div></div>
+              <div class="field-grid">
+                <label class="field"><span>HTTP(S) 代理</span><input id="setProxy" placeholder="http://127.0.0.1:7890"></label>
+                <label class="field"><span>默认交易所</span><select id="setExchange"><option value="binance">币安 Binance</option><option value="okx">欧易 OKX</option></select></label>
+                <label class="field"><span>默认数据源</span><select id="setDataSource"><option value="binance">币安 Binance</option><option value="okx">欧易 OKX</option></select></label>
+                <label class="field"><span>默认模式</span><select id="setMode"><option value="paper">纸面模拟</option><option value="testnet">测试网</option><option value="live">实盘</option></select></label>
+              </div>
+              <div class="form-actions"><button class="btn btn-primary" id="saveSettings">保存设置</button>
+                <button class="btn btn-ghost" id="testPublic">检测公共接口</button></div>
+              <div class="probe-box" id="probeBox" hidden></div>
+            </div>
+          </div>
+
+          <div class="stack">
+            <div class="card risk-card">
+              <div class="card-head"><div><h3>实盘风险确认</h3><p>启用实盘交易前必须确认</p></div></div>
+              <p class="risk-text">合约交易具有高杠杆与爆仓风险。本策略无独立止损，依赖反向交叉离场；在极端行情下可能产生较大回撤甚至损失全部保证金。请先在测试网或纸面模式充分验证。</p>
+              <label class="checkline">
+                <input type="checkbox" id="riskAck">
+                <span>我已阅读并确认上述风险，仅使用可承受损失的资金</span>
+              </label>
+              <button class="btn btn-primary btn-block" id="saveRisk">确认风险设置</button>
+              <div class="risk-status" id="riskStatus">未确认</div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><div><h3>策略说明</h3><p>刘一策略 · 默认参数</p></div></div>
+              <div class="kv-list">
+                <div><span>交易对</span><b>ETH/USDT 永续</b></div>
+                <div><span>信号</span><b>EMA25 / EMA99 · 15m</b></div>
+                <div><span>目标</span><b>净收益 ≥ 仓位 7%</b></div>
+                <div><span>加仓</span><b>连续 4 笔未达标 +50%</b></div>
+                <div><span>止盈后</span><b>跳过 20 次交叉</b></div>
+                <div><span>杠杆</span><b>自动 · 上限 30x</b></div>
+                <div><span>成本</span><b>taker 0.05%/边 · 资金费 0.01%/8h</b></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><div><h3>使用步骤</h3><p>从回测到实盘的推荐路径</p></div></div>
+              <ol class="step-list">
+                <li><b>1</b> 在「数据中心」同步 ETH 历史数据。</li>
+                <li><b>2</b> 在「策略回测」验证收益与回撤。</li>
+                <li><b>3</b> 配置币安测试网 Key，用测试网运行。</li>
+                <li><b>4</b> 小资金实盘，并随时使用一键全平。</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<div id="toasts" class="toasts"></div>
+
+<script src="/static/vendor/echarts.min.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

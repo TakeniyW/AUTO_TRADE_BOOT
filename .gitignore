@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 本地运行数据（行情库、缓存、配置、API Key）
+data/quant.db
+data/quant.db-shm
+data/quant.db-wal
+data/config.json
+data/presets.json
+data/secrets.json
+data/cache/
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+*.log
